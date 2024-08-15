@@ -12,24 +12,28 @@ namespace XML_Exploration
             string filepath = "/Users/swirkes/development/XML_Exploration/xmlsamples/MozartPianoSonata.musicxml";
             XDocument xmlDoc = XDocument.Load(filepath);
 
-            foreach (XElement element in xmlDoc.Descendants())
+            foreach (XElement element in xmlDoc.Descendants("key"))
             {
-                //Console.WriteLine(element.Name);
-                if (element.Name != "key")
+                XElement fifthsElement = element.Element("fifths");
+                if (fifthsElement != null)
                 {
-                    continue;
+                    fifthsElement.Value = "0";
                 }
-                
-                var key = element.Value;
-                Console.WriteLine($"Key is {key}.");
 
-                key = "0major";
-                Console.WriteLine($"Key is {key}");
+                XElement modeElement = element.Element("mode");
+                if (modeElement != null)
+                {
+                    modeElement.Value = "major";
+                }
             }
+            
+            
 
             string keyChangeMozartSonata = "/Users/swirkes/development/XML_Exploration/xmlsamples/KeyChangeMozartPianoSonata.musicxml";
             xmlDoc.Save(keyChangeMozartSonata);
-
+            
+            Console.WriteLine("Key change applied and file saved.");
+            
         }
     }
 }
