@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Xml;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 namespace XML_Exploration
 {
@@ -9,27 +6,54 @@ namespace XML_Exploration
     {
         static void Main()
         {
-            string filepath = "/Users/swirkes/development/XML_Exploration/xmlsamples/MozartPianoSonata.musicxml";
-            XDocument xmlDoc = XDocument.Load(filepath);
+            var filepath = "/Users/swirkes/development/XML_Exploration/xmlsamples/MozartPianoSonata.musicxml";
+            var xmlDoc = XDocument.Load(filepath);
 
-            foreach (XElement element in xmlDoc.Descendants("key"))
+            var pitchClasses = new[] { "C", "D", "E", "F", "G", "A", "B" };
+
+            var notes = xmlDoc.Descendants("note");
+
+            foreach (var note in notes)
             {
-                XElement fifthsElement = element.Element("fifths");
-                if (fifthsElement != null)
-                {
-                    fifthsElement.Value = "0";
-                }
+                var pitch = note.Element("pitch");
+                if (pitch == null)
+                    continue;
 
-                XElement modeElement = element.Element("mode");
-                if (modeElement != null)
-                {
-                    modeElement.Value = "major";
+                var stepElement = pitch.Element("step");
+                var alterElement = pitch.Element("alter");
+                var octaveElement = pitch.Element("octave");
+                
+                if (stepElement == null || octaveElement == null)
+                    continue;
+                
+                var step = stepElement.Value; 
+                var octave = int.Parse(octaveElement.Value);
+                
+                var index = Array.IndexOf(pitchClasses, step);
+                var newIndex = index - 5;
+                
+                if (newIndex < 0) 
+                { 
+                    newIndex += pitchClasses.Length; 
+                    octave -= 1;
                 }
+                
+                stepElement.Value = pitchClasses[newIndex]; 
+                octaveElement.Value = octave.ToString();
+                
+                if (alterElement == null)
+                    continue;
+
+                alterElement.Value = "0";
+            }
+
+            foreach (var element in xmlDoc.Descendants("key"))
+            {
+                element.Element("fifths")?.SetValue("0");
+                element.Element("mode")?.SetValue("major");
             }
             
-            
-
-            string keyChangeMozartSonata = "/Users/swirkes/development/XML_Exploration/xmlsamples/KeyChangeMozartPianoSonata.musicxml";
+            var keyChangeMozartSonata = "/Users/swirkes/development/XML_Exploration/xmlsamples/KeyChangeMozartPianoSonata.musicxml";
             xmlDoc.Save(keyChangeMozartSonata);
             
             Console.WriteLine("Key change applied and file saved.");
